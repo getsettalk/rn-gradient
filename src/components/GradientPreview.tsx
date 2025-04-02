@@ -55,15 +55,20 @@ const GradientPreview = ({ gradient, onRandomize, onSave, codeFormat }: Gradient
         
         <Button
           onClick={() => {
+            // Call the save function
             onSave();
+            
             // Add visual feedback
             const button = document.activeElement as HTMLButtonElement;
             if (button) {
-              button.classList.add('animate-pulse', 'bg-green-600');
+              button.classList.add('animate-pulse', 'bg-green-600', 'text-white');
               setTimeout(() => {
-                button.classList.remove('animate-pulse', 'bg-green-600');
+                button.classList.remove('animate-pulse', 'bg-green-600', 'text-white');
               }, 500);
             }
+            
+            // Show toast directly from here as well
+            toast('Gradient saved successfully', { type: 'success' });
           }}
           variant="outline"
           className="flex items-center gap-1 active:scale-95 transition-transform hover:border-primary/50"

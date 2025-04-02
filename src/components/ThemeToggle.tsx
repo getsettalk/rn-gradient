@@ -46,7 +46,7 @@ export function ThemeToggle() {
   return (
     <div className="flex items-center gap-2 border rounded-full p-1 bg-background shadow-sm">
       <Button
-        variant={theme === 'light' ? 'default' : 'ghost'}
+        variant="ghost"
         size="icon"
         onClick={() => {
           handleThemeChange('light');
@@ -61,14 +61,14 @@ export function ThemeToggle() {
         }}
         aria-label="Light mode"
         className={`transition-all ${theme === 'light' 
-          ? 'bg-primary text-primary-foreground scale-100 shadow-md' 
-          : 'hover:text-primary hover:bg-background/80'}`}
+          ? 'bg-primary text-white scale-100 shadow-md' 
+          : 'text-foreground hover:text-primary hover:bg-background/80'}`}
       >
         <Sun className="h-5 w-5" />
       </Button>
       
       <Button
-        variant={theme === 'dark' ? 'default' : 'ghost'}
+        variant="ghost"
         size="icon"
         onClick={() => {
           handleThemeChange('dark');
@@ -83,14 +83,14 @@ export function ThemeToggle() {
         }}
         aria-label="Dark mode"
         className={`transition-all ${theme === 'dark' 
-          ? 'bg-primary text-primary-foreground scale-100 shadow-md' 
-          : 'hover:text-primary hover:bg-background/80'}`}
+          ? 'bg-primary text-white scale-100 shadow-md' 
+          : 'text-foreground hover:text-primary hover:bg-background/80'}`}
       >
         <Moon className="h-5 w-5" />
       </Button>
       
       <Button
-        variant={theme === 'system' ? 'default' : 'ghost'}
+        variant="ghost"
         size="icon"
         onClick={() => {
           handleThemeChange('system');
@@ -107,8 +107,8 @@ export function ThemeToggle() {
         }}
         aria-label="System theme"
         className={`transition-all ${theme === 'system' 
-          ? 'bg-primary text-primary-foreground scale-100 shadow-md' 
-          : 'hover:text-primary hover:bg-background/80'}`}
+          ? 'bg-primary text-white scale-100 shadow-md' 
+          : 'text-foreground hover:text-primary hover:bg-background/80'}`}
       >
         <Monitor className="h-5 w-5" />
       </Button>

@@ -37,13 +37,12 @@ export function ToastProvider() {
         <div
           key={toast.id}
           className={cn(
-            "bg-card shadow-xl rounded-lg border-l-4 overflow-hidden pointer-events-auto flex items-center p-4 transition-all",
-            "animate-in slide-in-from-right-full duration-300 animate-pulse",
+            "bg-card shadow-2xl rounded-lg border-l-4 overflow-hidden pointer-events-auto flex items-center p-4 transition-all",
+            "animate-in slide-in-from-right-full zoom-in duration-300",
             getToastBorderColor(toast.type)
           )}
           style={{
-            animationIterationCount: 1,
-            animationDuration: '0.3s',
+            transform: "translateZ(0)",  // Force GPU acceleration
             animationFillMode: 'forwards'
           }}
         >
