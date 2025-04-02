@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Gradient } from '../shared/schema';
 import { generateGradientCSS, generateReactNativeCode } from '../lib/gradient';
 import { useToast } from '../hooks/use-toast';
+import { SimpleThemeToggle } from './SimpleThemeToggle';
 
 interface GradientPreviewProps {
   gradient: Gradient;
@@ -76,6 +77,9 @@ const GradientPreview = ({ gradient, onRandomize, onSave, codeFormat }: Gradient
           <Save className="h-4 w-4 mr-1" />
           Save
         </Button>
+        
+        {/* Theme Toggle */}
+        <SimpleThemeToggle />
         
         <Button
           onClick={handleCopy}

@@ -3,7 +3,6 @@ import { Route, Switch } from 'wouter';
 import GradientGenerator from './pages/GradientGenerator';
 import NotFound from './pages/not-found';
 import { ToastProvider } from './components/ToastProvider';
-import { SimpleThemeToggle } from './components/SimpleThemeToggle';
 
 function Router() {
   return (
@@ -35,9 +34,6 @@ function App() {
               Gradient Generator
             </h1>
           </div>
-          
-          {/* Simple theme toggle button */}
-          <SimpleThemeToggle />
         </div>
       </header>
       
