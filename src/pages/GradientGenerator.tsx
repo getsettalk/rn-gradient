@@ -186,32 +186,7 @@ export default function GradientGenerator() {
   };
   
   return (
-    <div className="min-h-screen bg-background text-foreground pb-16">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur-md shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 mr-3 hidden sm:flex items-center justify-center text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 3v12"></path>
-                <path d="M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
-                <path d="M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
-                <path d="M15 12a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"></path>
-                <path d="M18 6l-6.15 6"></path>
-                <path d="M12 18l-6-6"></path>
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Gradient Generator
-            </h1>
-          </div>
-          
-          <div className="flex items-center">
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
-      
+    <div className="min-h-screen bg-background text-foreground pb-16 pt-6">
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
