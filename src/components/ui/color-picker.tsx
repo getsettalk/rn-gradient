@@ -1,24 +1,57 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useRef, useEffect } from 'react';
+import { cn } from '../../lib/utils';
 
 interface ColorPickerProps {
   color: string;
   onChange: (color: string) => void;
-  onClose: () => void;
+  onClose?: () => void;
 }
+
+export const ColorPickerButton = ({ color, onChange }: { color: string; onChange: (color: string) => void }) => {
+  const [showPicker, setShowPicker] = useState(false);
+  
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        className="w-8 h-8 rounded-md border overflow-hidden shadow-sm"
+        style={{ backgroundColor: color }}
+        onClick={() => setShowPicker(prev => !prev)}
+        aria-label="Choose color"
+      />
+      
+      {showPicker && (
+        <div className="absolute top-full left-0 mt-2 z-10">
+          <ColorPicker
+            color={color}
+            onChange={onChange}
+            onClose={() => setShowPicker(false)}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const ColorPicker = ({ color, onChange, onClose }: ColorPickerProps) => {
   const [hsb, setHsb] = useState(hexToHsb(color));
-  const [currentColor, setCurrentColor] = useState(color);
+  const [inputValue, setInputValue] = useState(color);
   
   const saturationRef = useRef<HTMLDivElement>(null);
   const hueRef = useRef<HTMLDivElement>(null);
-  const pickerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  
+  // Set input value when color changes
+  useEffect(() => {
+    setInputValue(color);
+    setHsb(hexToHsb(color));
+  }, [color]);
   
   useEffect(() => {
-    // Handle clicking outside of the color picker
+    // Close the color picker when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        onClose();
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        onClose && onClose();
       }
     };
     
@@ -28,29 +61,33 @@ export const ColorPicker = ({ color, onChange, onClose }: ColorPickerProps) => {
     };
   }, [onClose]);
   
-  useEffect(() => {
-    // Update the color when hsb changes
-    const newColor = hsbToHex(hsb.h, hsb.s, hsb.b);
-    setCurrentColor(newColor);
-    onChange(newColor);
-  }, [hsb, onChange]);
-  
-  // Handle saturation/brightness selection
-  useEffect(() => {
+  // Handle saturation change
+  const handleSaturationChange = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!saturationRef.current) return;
     
+    const { current: element } = saturationRef;
+    const rect = element.getBoundingClientRect();
+    
     const updateSaturation = (event: MouseEvent) => {
-      const rect = saturationRef.current!.getBoundingClientRect();
       const x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
       const y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
       
-      setHsb(prev => ({
-        ...prev,
-        s: x,
-        b: 1 - y
-      }));
+      const newHsb = {
+        ...hsb,
+        s: x * 100,
+        b: 100 - y * 100
+      };
+      
+      setHsb(newHsb);
+      const hex = hsbToHex(newHsb.h, newHsb.s, newHsb.b);
+      setInputValue(hex);
+      onChange(hex);
     };
     
+    // Initial update
+    updateSaturation(event.nativeEvent);
+    
+    // Handle mouse movement
     const handleMouseMove = (event: MouseEvent) => {
       updateSaturation(event);
     };
@@ -60,37 +97,35 @@ export const ColorPicker = ({ color, onChange, onClose }: ColorPickerProps) => {
       document.removeEventListener('mouseup', handleMouseUp);
     };
     
-    const handleMouseDown = (event: MouseEvent) => {
-      updateSaturation(event);
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    };
-    
-    saturationRef.current.addEventListener('mousedown', handleMouseDown);
-    
-    return () => {
-      if (saturationRef.current) {
-        saturationRef.current.removeEventListener('mousedown', handleMouseDown);
-      }
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
   
-  // Handle hue selection
-  useEffect(() => {
+  // Handle hue change
+  const handleHueChange = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!hueRef.current) return;
     
+    const { current: element } = hueRef;
+    const rect = element.getBoundingClientRect();
+    
     const updateHue = (event: MouseEvent) => {
-      const rect = hueRef.current!.getBoundingClientRect();
       const x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
       
-      setHsb(prev => ({
-        ...prev,
-        h: x * 360
-      }));
+      const newHsb = {
+        ...hsb,
+        h: Math.round(x * 360)
+      };
+      
+      setHsb(newHsb);
+      const hex = hsbToHex(newHsb.h, newHsb.s, newHsb.b);
+      setInputValue(hex);
+      onChange(hex);
     };
     
+    // Initial update
+    updateHue(event.nativeEvent);
+    
+    // Handle mouse movement
     const handleMouseMove = (event: MouseEvent) => {
       updateHue(event);
     };
@@ -100,100 +135,109 @@ export const ColorPicker = ({ color, onChange, onClose }: ColorPickerProps) => {
       document.removeEventListener('mouseup', handleMouseUp);
     };
     
-    const handleMouseDown = (event: MouseEvent) => {
-      updateHue(event);
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+  
+  // Handle hex input change
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setInputValue(value);
     
-    hueRef.current.addEventListener('mousedown', handleMouseDown);
-    
-    return () => {
-      if (hueRef.current) {
-        hueRef.current.removeEventListener('mousedown', handleMouseDown);
+    // Validate hex color format
+    if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(value)) {
+      try {
+        const newHsb = hexToHsb(value);
+        setHsb(newHsb);
+        onChange(value);
+      } catch (error) {
+        // Invalid color format
       }
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
+    }
+  };
   
-  // Generate background colors for the hue slider
-  const hueBackground = `linear-gradient(to right, 
-    #ff0000 0%, 
-    #ffff00 17%, 
-    #00ff00 33%, 
-    #00ffff 50%, 
-    #0000ff 67%, 
-    #ff00ff 83%, 
-    #ff0000 100%
-  )`;
-  
-  // Generate background for the saturation/brightness area
-  const saturationBackground = `linear-gradient(to right, #fff, hsl(${hsb.h}, 100%, 50%))`;
-  const brightnessOverlay = 'linear-gradient(to bottom, transparent, #000)';
+  // Convert HSB to background gradient for saturation picker
+  const saturationGradient = `linear-gradient(to right, #fff, hsl(${hsb.h}, 100%, 50%))`;
+  const brightnessGradient = 'linear-gradient(to top, #000, transparent)';
   
   return (
     <div 
-      ref={pickerRef}
-      className="absolute z-50 w-64 p-3 bg-card border rounded-lg shadow-lg"
-      style={{ left: '0', top: '100%', marginTop: '5px' }}
+      ref={wrapperRef}
+      className="p-4 bg-card border rounded-lg shadow-lg w-64"
     >
-      <div className="space-y-3">
-        {/* Current color display */}
+      {/* Current color preview */}
+      <div 
+        className="w-full h-8 rounded-md mb-4"
+        style={{ backgroundColor: inputValue }}
+      />
+      
+      {/* Saturation/Brightness picker */}
+      <div 
+        ref={saturationRef}
+        className="w-full h-32 rounded-md mb-4 relative cursor-crosshair"
+        style={{ background: `${saturationGradient}, ${brightnessGradient}` }}
+        onMouseDown={handleSaturationChange}
+      >
+        {/* Thumb indicator */}
         <div 
-          className="h-8 w-full rounded"
-          style={{ backgroundColor: currentColor }}
-        ></div>
-        
-        {/* Saturation/Brightness area */}
-        <div
-          ref={saturationRef}
-          className="relative h-32 w-full rounded cursor-crosshair"
+          className="absolute w-4 h-4 -translate-x-1/2 -translate-y-1/2 border-2 border-white rounded-full pointer-events-none"
           style={{ 
-            background: saturationBackground,
-            backgroundImage: `${saturationBackground}, ${brightnessOverlay}`
+            left: `${hsb.s}%`, 
+            top: `${100 - hsb.b}%`,
+            backgroundColor: inputValue,
           }}
-        >
-          <div
-            className="absolute w-3 h-3 rounded-full border-2 border-white -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-            style={{
-              left: `${hsb.s * 100}%`,
-              top: `${(1 - hsb.b) * 100}%`,
-              boxShadow: '0 0 2px rgba(0, 0, 0, 0.5)'
-            }}
-          ></div>
-        </div>
-        
-        {/* Hue slider */}
-        <div
-          ref={hueRef}
-          className="relative h-6 w-full rounded cursor-pointer"
-          style={{ background: hueBackground }}
-        >
-          <div
-            className="absolute w-2 h-6 rounded-sm border-2 border-white -translate-x-1/2 pointer-events-none"
-            style={{
-              left: `${(hsb.h / 360) * 100}%`,
-              boxShadow: '0 0 2px rgba(0, 0, 0, 0.5)'
-            }}
-          ></div>
-        </div>
-        
-        {/* Hex display */}
-        <div className="flex items-center space-x-2">
-          <div className="text-sm font-medium">Hex:</div>
-          <div className="text-sm font-mono">{currentColor.toUpperCase()}</div>
-        </div>
+        />
+      </div>
+      
+      {/* Hue slider */}
+      <div 
+        ref={hueRef}
+        className="w-full h-6 rounded-md mb-4 cursor-ew-resize"
+        style={{ background: 'linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)' }}
+        onMouseDown={handleHueChange}
+      >
+        {/* Thumb indicator */}
+        <div 
+          className="relative w-4 h-6 -translate-x-1/2 pointer-events-none"
+          style={{ 
+            left: `${hsb.h / 360 * 100}%`,
+            backgroundColor: `hsl(${hsb.h}, 100%, 50%)`,
+            border: '2px solid white',
+            borderRadius: '2px',
+          }}
+        />
+      </div>
+      
+      {/* Hex input */}
+      <div className="flex items-center">
+        <label className="text-xs text-muted-foreground mr-2">#</label>
+        <input
+          type="text"
+          value={inputValue.replace('#', '')}
+          onChange={handleInputChange}
+          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          placeholder="Hex color"
+        />
       </div>
     </div>
   );
 };
 
-// Helper functions for color conversions
+// Helper functions for color conversion
+
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
+  // Remove # if present
+  hex = hex.replace('#', '');
+  
+  // Convert shorthand hex to full form
+  if (hex.length === 3) {
+    hex = hex.split('').map(char => char + char).join('');
+  }
+  
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  
   return { r, g, b };
 }
 
@@ -207,7 +251,10 @@ function rgbToHsb(r: number, g: number, b: number): { h: number; s: number; b: n
   const delta = max - min;
   
   let h = 0;
-  if (delta > 0) {
+  let s = max === 0 ? 0 : delta / max;
+  let v = max;
+  
+  if (delta !== 0) {
     if (max === r) {
       h = ((g - b) / delta) % 6;
     } else if (max === g) {
@@ -220,46 +267,29 @@ function rgbToHsb(r: number, g: number, b: number): { h: number; s: number; b: n
     if (h < 0) h += 360;
   }
   
-  const s = max === 0 ? 0 : delta / max;
-  const v = max;
-  
-  return { h, s, b: v };
+  return { h, s: s * 100, b: v * 100 };
 }
 
 function hexToHsb(hex: string): { h: number; s: number; b: number } {
-  const { r, g, b } = hexToRgb(hex);
-  return rgbToHsb(r, g, b);
+  const rgb = hexToRgb(hex);
+  return rgbToHsb(rgb.r, rgb.g, rgb.b);
 }
 
 function hsbToRgb(h: number, s: number, b: number): { r: number; g: number; b: number } {
-  const c = b * s;
-  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-  const m = b - c;
+  s /= 100;
+  b /= 100;
   
-  let r = 0, g = 0, bl = 0;
-  
-  if (h >= 0 && h < 60) {
-    r = c; g = x; bl = 0;
-  } else if (h >= 60 && h < 120) {
-    r = x; g = c; bl = 0;
-  } else if (h >= 120 && h < 180) {
-    r = 0; g = c; bl = x;
-  } else if (h >= 180 && h < 240) {
-    r = 0; g = x; bl = c;
-  } else if (h >= 240 && h < 300) {
-    r = x; g = 0; bl = c;
-  } else {
-    r = c; g = 0; bl = x;
-  }
+  const k = (n: number) => (n + h / 60) % 6;
+  const f = (n: number) => b * (1 - s * Math.max(0, Math.min(k(n), 4 - k(n), 1)));
   
   return {
-    r: Math.round((r + m) * 255),
-    g: Math.round((g + m) * 255),
-    b: Math.round((bl + m) * 255)
+    r: Math.round(255 * f(5)),
+    g: Math.round(255 * f(3)),
+    b: Math.round(255 * f(1))
   };
 }
 
 function hsbToHex(h: number, s: number, b: number): string {
-  const { r, g, b: bl } = hsbToRgb(h, s, b);
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${bl.toString(16).padStart(2, '0')}`;
+  const rgb = hsbToRgb(h, s, b);
+  return `#${rgb.r.toString(16).padStart(2, '0')}${rgb.g.toString(16).padStart(2, '0')}${rgb.b.toString(16).padStart(2, '0')}`;
 }

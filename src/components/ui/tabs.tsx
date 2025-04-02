@@ -1,5 +1,20 @@
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import React, { createContext, useContext, useState } from 'react';
+import { cn } from '../../lib/utils';
+
+interface TabsContextProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+const TabsContext = createContext<TabsContextProps | undefined>(undefined);
+
+function useTabsContext() {
+  const context = useContext(TabsContext);
+  if (!context) {
+    throw new Error('Tabs compound components must be used within a Tabs component');
+  }
+  return context;
+}
 
 interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
   defaultValue?: string;
@@ -8,25 +23,21 @@ interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const Tabs = ({ className, defaultValue, value, onValueChange, ...props }: TabsProps) => {
-  const [selectedValue, setSelectedValue] = React.useState(value || defaultValue);
-
-  React.useEffect(() => {
-    if (value !== undefined) {
-      setSelectedValue(value);
+  const [tabValue, setTabValue] = useState(value || defaultValue || '');
+  
+  const handleChange = (newValue: string) => {
+    if (!value) {
+      setTabValue(newValue);
     }
-  }, [value]);
-
-  const handleValueChange = (newValue: string) => {
-    setSelectedValue(newValue);
-    onValueChange?.(newValue);
+    if (onValueChange) {
+      onValueChange(newValue);
+    }
   };
-
+  
   return (
-    <div
-      className={cn("w-full", className)}
-      data-selected-value={selectedValue}
-      {...props}
-    />
+    <TabsContext.Provider value={{ value: value || tabValue, onChange: handleChange }}>
+      <div className={cn('', className)} {...props} />
+    </TabsContext.Provider>
   );
 };
 
@@ -35,7 +46,7 @@ interface TabsListProps extends React.HTMLAttributes<HTMLDivElement> {}
 export const TabsList = ({ className, ...props }: TabsListProps) => (
   <div
     className={cn(
-      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+      "flex flex-wrap items-center justify-start rounded-md bg-muted p-1 text-muted-foreground",
       className
     )}
     {...props}
@@ -47,31 +58,19 @@ interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 }
 
 export const TabsTrigger = ({ className, value, ...props }: TabsTriggerProps) => {
-  const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const tabs = e.currentTarget.closest("[data-selected-value]") as HTMLElement;
-    if (tabs) {
-      const onValueChange = (tabs as any).__onValueChange;
-      if (onValueChange) onValueChange(value);
-      else {
-        // Fallback to manually updating the data attribute
-        tabs.setAttribute("data-selected-value", value);
-      }
-    }
-    props.onClick?.(e);
-  };
-
+  const { value: selectedValue, onChange } = useTabsContext();
+  const isSelected = selectedValue === value;
+  
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[selected]:bg-background data-[selected]:text-foreground data-[selected]:shadow-sm",
+        "inline-flex items-center justify-center whitespace-nowrap px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 rounded-md",
+        isSelected
+          ? "bg-background text-foreground shadow-sm"
+          : "hover:bg-background/50 hover:text-foreground",
         className
       )}
-      data-selected={
-        value === (props as any).parentElement?.parentElement?.getAttribute("data-selected-value")
-          ? ""
-          : undefined
-      }
-      onClick={onClick}
+      onClick={() => onChange(value)}
       {...props}
     />
   );
@@ -81,20 +80,19 @@ interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
   value: string;
 }
 
-export const TabsContent = ({ className, value, ...props }: TabsContentProps) => (
-  <div
-    className={cn(
-      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      className
-    )}
-    data-state={
-      value === (props as any).parentElement?.getAttribute("data-selected-value")
-        ? "active"
-        : "inactive"
-    }
-    hidden={
-      value !== (props as any).parentElement?.getAttribute("data-selected-value")
-    }
-    {...props}
-  />
-);
+export const TabsContent = ({ className, value, ...props }: TabsContentProps) => {
+  const { value: selectedValue } = useTabsContext();
+  const isSelected = selectedValue === value;
+  
+  if (!isSelected) return null;
+  
+  return (
+    <div
+      className={cn(
+        "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        className
+      )}
+      {...props}
+    />
+  );
+};

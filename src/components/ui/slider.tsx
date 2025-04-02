@@ -1,5 +1,5 @@
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import React, { useRef, useState, useEffect } from 'react';
+import { cn } from '../../lib/utils';
 
 interface SliderProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue'> {
@@ -14,37 +14,67 @@ interface SliderProps
 export const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
   ({ 
     className, 
+    value, 
+    defaultValue, 
     min = 0, 
     max = 100, 
     step = 1, 
-    value, 
-    defaultValue, 
-    onValueChange,
+    onValueChange, 
     ...props 
   }, ref) => {
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = parseFloat(event.target.value);
-      onValueChange?.([newValue]);
+    const [values, setValues] = useState<number[]>(
+      value || defaultValue || [min]
+    );
+    
+    const sliderRef = useRef<HTMLDivElement>(null);
+    
+    // Update internal state when value prop changes
+    useEffect(() => {
+      if (value) {
+        setValues(value);
+      }
+    }, [value]);
+    
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = parseFloat(e.target.value);
+      const newValues = [newValue];
+      
+      setValues(newValues);
+      
+      if (onValueChange) {
+        onValueChange(newValues);
+      }
     };
-
-    // Calculate percentage for the slider thumb position and colored track
-    const currentValue = value?.[0] ?? defaultValue?.[0] ?? min;
-    const percent = ((currentValue - min) / (max - min)) * 100;
-
+    
+    const percent = ((values[0] - min) / (max - min)) * 100;
+    
     return (
-      <div className={cn("relative w-full", className)}>
+      <div 
+        ref={sliderRef}
+        className={cn(
+          "relative flex w-full touch-none select-none items-center",
+          className
+        )}
+      >
+        <div className="relative w-full h-2 bg-secondary rounded-full overflow-hidden">
+          <div 
+            className="absolute h-full bg-primary" 
+            style={{ width: `${percent}%` }}
+          />
+        </div>
         <input
           type="range"
           ref={ref}
           min={min}
           max={max}
           step={step}
-          value={currentValue}
+          value={values[0]}
           onChange={handleChange}
-          className="w-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-muted [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:mt-[-3px] [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-primary [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-muted [&::-webkit-slider-runnable-track]:h-2"
-          style={{
-            background: `linear-gradient(to right, var(--primary) 0%, var(--primary) ${percent}%, var(--muted) ${percent}%, var(--muted) 100%)`
-          }}
+          className={cn(
+            "absolute w-full h-2 appearance-none bg-transparent cursor-pointer",
+            "range-thumb:appearance-none range-thumb:h-4 range-thumb:w-4 range-thumb:rounded-full",
+            "range-thumb:border-none range-thumb:bg-primary range-thumb:shadow"
+          )}
           {...props}
         />
       </div>

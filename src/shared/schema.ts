@@ -1,22 +1,21 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-// Schema for color stops
+// Schema for a color stop in a gradient
 export const colorStopSchema = z.object({
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, {
-    message: "Color must be a valid hex color code (e.g. #FF0000)"
-  }),
-  position: z.number().min(0).max(1)
+  color: z.string(),  // Hex color code
+  location: z.number().min(0).max(1),  // Position in the gradient (0 to 1)
+  opacity: z.number().min(0).max(1)    // Opacity of the color stop (0 to 1)
 });
 
-export type ColorStop = z.infer<typeof colorStopSchema>;
-
-// Schema for gradients
+// Schema for a linear gradient
 export const gradientSchema = z.object({
-  id: z.string(),
-  name: z.string().optional(),
-  angle: z.number().min(0).max(360).default(90),
-  useAngle: z.boolean().default(true),
-  colorStops: z.array(colorStopSchema).min(2).max(5)
+  id: z.string().optional(),  // Unique identifier for the gradient
+  name: z.string().optional(), // Optional name for the gradient
+  colorStops: z.array(colorStopSchema).min(2),  // At least 2 color stops
+  angle: z.number().min(0).max(360).default(90),  // Angle of the gradient in degrees
+  useAngle: z.boolean().default(true)  // Whether to use the angle or not
 });
 
+// TypeScript types from schemas
+export type ColorStop = z.infer<typeof colorStopSchema>;
 export type Gradient = z.infer<typeof gradientSchema>;

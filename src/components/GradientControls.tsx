@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { Gradient, ColorStop } from "../shared/schema";
-import { Slider } from "./ui/slider";
-import { Label } from "./ui/label";
-import { Button } from "./ui/button";
-import { Switch } from "./ui/switch";
-import { ColorPicker } from "./ui/color-picker";
-import { Trash2, Plus } from "lucide-react";
+import React from 'react';
+import { Gradient, ColorStop } from '../shared/schema';
+import { Button } from './ui/button';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
+import { Slider } from './ui/slider';
+import { Trash2, Plus } from 'lucide-react';
+import { ColorPickerButton } from './ui/color-picker';
 
 interface GradientControlsProps {
   gradient: Gradient;
@@ -16,54 +16,58 @@ interface GradientControlsProps {
   onToggleUseAngle: (useAngle: boolean) => void;
 }
 
-const GradientControls = ({
+export const GradientControls = ({
   gradient,
   onAngleChange,
   onColorStopChange,
   onAddColorStop,
   onRemoveColorStop,
-  onToggleUseAngle,
+  onToggleUseAngle
 }: GradientControlsProps) => {
-  const [activeColorPicker, setActiveColorPicker] = useState<number | null>(null);
+  // Sort color stops by location
+  const sortedColorStops = [...gradient.colorStops].sort((a, b) => a.location - b.location);
   
   // Handle angle change
   const handleAngleChange = (values: number[]) => {
-    onAngleChange(values[0]);
+    if (values.length > 0) {
+      onAngleChange(values[0]);
+    }
   };
   
   // Handle color change
   const handleColorChange = (index: number, color: string) => {
-    const newColorStop = { ...gradient.colorStops[index], color };
-    onColorStopChange(index, newColorStop);
+    const colorStop = { ...gradient.colorStops[index], color };
+    onColorStopChange(index, colorStop);
   };
   
-  // Handle position change
-  const handlePositionChange = (index: number, values: number[]) => {
-    const newColorStop = { ...gradient.colorStops[index], position: values[0] / 100 };
-    onColorStopChange(index, newColorStop);
-  };
-  
-  // Toggle color picker
-  const toggleColorPicker = (index: number) => {
-    if (activeColorPicker === index) {
-      setActiveColorPicker(null);
-    } else {
-      setActiveColorPicker(index);
+  // Handle location change
+  const handleLocationChange = (index: number, values: number[]) => {
+    if (values.length > 0) {
+      const colorStop = { ...gradient.colorStops[index], location: values[0] };
+      onColorStopChange(index, colorStop);
     }
   };
   
-  // Sort color stops by position
-  const sortedColorStops = [...gradient.colorStops].sort((a, b) => a.position - b.position);
+  // Handle opacity change
+  const handleOpacityChange = (index: number, values: number[]) => {
+    if (values.length > 0) {
+      const colorStop = { ...gradient.colorStops[index], opacity: values[0] };
+      onColorStopChange(index, colorStop);
+    }
+  };
   
   return (
-    <div className="space-y-8 bg-card p-6 rounded-lg border">
-      <h2 className="text-lg font-semibold">Gradient Controls</h2>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Gradient Controls</h2>
+      </div>
       
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <Label htmlFor="useAngle">Use Angle</Label>
-          <Switch 
-            id="useAngle"
+      {/* Angle Controls */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="use-angle" className="font-medium">Use Angle</Label>
+          <Switch
+            id="use-angle"
             checked={gradient.useAngle}
             onCheckedChange={onToggleUseAngle}
           />
@@ -71,11 +75,11 @@ const GradientControls = ({
         
         {gradient.useAngle && (
           <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label htmlFor="angle">Angle: {gradient.angle}°</Label>
+            <div className="flex justify-between items-center">
+              <Label htmlFor="angle-slider" className="text-sm">Angle: {gradient.angle}°</Label>
             </div>
             <Slider
-              id="angle"
+              id="angle-slider"
               min={0}
               max={360}
               step={1}
@@ -86,66 +90,75 @@ const GradientControls = ({
         )}
       </div>
       
-      <div className="space-y-6">
+      {/* Color Stops Controls */}
+      <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-base font-medium">Color Stops</h3>
-          {gradient.colorStops.length < 5 && (
-            <Button 
-              onClick={onAddColorStop} 
-              size="sm" 
-              variant="outline"
-              title="Add new color stop"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Add
-            </Button>
-          )}
+          <h3 className="font-medium">Color Stops</h3>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onAddColorStop}
+            disabled={gradient.colorStops.length >= 5}
+            className="flex items-center gap-1"
+          >
+            <Plus className="w-4 h-4" />
+            Add Color
+          </Button>
         </div>
         
         <div className="space-y-4">
           {sortedColorStops.map((colorStop, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <div
-                    className="w-10 h-10 rounded border cursor-pointer"
-                    style={{ backgroundColor: colorStop.color }}
-                    onClick={() => toggleColorPicker(index)}
+            <div key={index} className="p-4 border rounded-md space-y-3">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <ColorPickerButton 
+                    color={colorStop.color} 
+                    onChange={(color) => handleColorChange(index, color)} 
                   />
-                  {activeColorPicker === index && (
-                    <ColorPicker
-                      color={colorStop.color}
-                      onChange={(color) => handleColorChange(index, color)}
-                      onClose={() => setActiveColorPicker(null)}
-                    />
-                  )}
+                  <span className="text-sm font-medium">Stop {index + 1}</span>
                 </div>
                 
-                <div className="flex-1">
-                  <Label className="mb-1 block">
-                    Position: {Math.round(colorStop.position * 100)}%
-                  </Label>
-                  <Slider
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={[colorStop.position * 100]}
-                    onValueChange={(values) => handlePositionChange(index, values)}
-                  />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onRemoveColorStop(index)}
+                  disabled={gradient.colorStops.length <= 2}
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              {/* Location Slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <Label htmlFor={`location-${index}`}>Position</Label>
+                  <span>{Math.round(colorStop.location * 100)}%</span>
                 </div>
-                
-                {gradient.colorStops.length > 2 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive"
-                    onClick={() => onRemoveColorStop(index)}
-                    title="Remove color stop"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Remove</span>
-                  </Button>
-                )}
+                <Slider
+                  id={`location-${index}`}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={[colorStop.location]}
+                  onValueChange={(values) => handleLocationChange(index, values)}
+                />
+              </div>
+              
+              {/* Opacity Slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <Label htmlFor={`opacity-${index}`}>Opacity</Label>
+                  <span>{Math.round(colorStop.opacity * 100)}%</span>
+                </div>
+                <Slider
+                  id={`opacity-${index}`}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={[colorStop.opacity]}
+                  onValueChange={(values) => handleOpacityChange(index, values)}
+                />
               </div>
             </div>
           ))}
@@ -154,5 +167,3 @@ const GradientControls = ({
     </div>
   );
 };
-
-export default GradientControls;

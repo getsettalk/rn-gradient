@@ -1,13 +1,19 @@
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { clsx, type ClassValue } from "clsx";
 
+/**
+ * Combine class names with Tailwind's merge utility
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * Check if localStorage is available in the current environment
+ */
 export function isLocalStorageAvailable(): boolean {
   try {
-    const testKey = "__test__";
+    const testKey = '__test__';
     localStorage.setItem(testKey, testKey);
     localStorage.removeItem(testKey);
     return true;
@@ -16,26 +22,41 @@ export function isLocalStorageAvailable(): boolean {
   }
 }
 
+/**
+ * Theme type for the application
+ */
 export type Theme = 'light' | 'dark' | 'system';
 
+/**
+ * Get the current system theme preference
+ */
 export function getSystemTheme(): Theme {
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'dark';
-  }
-  return 'light';
+  if (typeof window === 'undefined') return 'light';
+  
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
 }
 
+/**
+ * Set the application theme
+ */
 export function setTheme(theme: Theme): void {
-  // Remove any existing theme classes
-  document.documentElement.classList.remove('light', 'dark');
+  if (typeof window === 'undefined') return;
   
-  // Apply the selected theme
-  if (theme === 'system') {
-    const systemTheme = getSystemTheme();
-    document.documentElement.classList.add(systemTheme);
+  const root = window.document.documentElement;
+  
+  // Remove current theme classes
+  root.classList.remove('light', 'dark');
+  
+  // Store the theme preference
+  if (theme !== 'system') {
+    root.classList.add(theme);
     localStorage.setItem('theme', theme);
   } else {
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
+    // Apply system preference
+    const systemTheme = getSystemTheme();
+    root.classList.add(systemTheme);
+    localStorage.setItem('theme', 'system');
   }
 }

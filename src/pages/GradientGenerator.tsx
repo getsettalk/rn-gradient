@@ -1,135 +1,157 @@
-import React, { useState, useEffect } from "react";
-import { Gradient, ColorStop } from "../shared/schema";
-import { generateRandomGradient, saveGradientToLocalStorage, getSavedGradientsFromLocalStorage, deleteGradientFromLocalStorage, deleteAllGradientsFromLocalStorage } from "../lib/gradient";
-import GradientPreview from "../components/GradientPreview";
-import GradientControls from "../components/GradientControls";
-import GradientCodeOutput from "../components/GradientCodeOutput";
-import SavedGradients from "../components/SavedGradients";
-import { useToast } from "../hooks/use-toast";
+import React, { useState, useEffect } from 'react';
+import { nanoid } from 'nanoid';
+import { Gradient, ColorStop } from '../shared/schema';
+import { generateRandomGradient, getSavedGradientsFromLocalStorage, saveGradientToLocalStorage, deleteGradientFromLocalStorage, deleteAllGradientsFromLocalStorage } from '../lib/gradient';
+import { GradientControls } from '../components/GradientControls';
+import { GradientCodeOutput } from '../components/GradientCodeOutput';
+import { SavedGradients } from '../components/SavedGradients';
+import GradientPreview from '../components/GradientPreview';
+import { useToast } from '../hooks/use-toast';
+import { ThemeToggle } from '../components/ThemeToggle';
 
-const GradientGenerator = () => {
-  // Initialize with a random gradient or load from storage
+export default function GradientGenerator() {
+  // State for the current working gradient
   const [gradient, setGradient] = useState<Gradient>(() => {
-    return generateRandomGradient();
+    return {
+      id: nanoid(),
+      name: "New Gradient",
+      colorStops: [
+        { color: "#FF5F6D", location: 0, opacity: 1 },
+        { color: "#FFC371", location: 1, opacity: 1 }
+      ],
+      angle: 90,
+      useAngle: true
+    };
   });
   
-  // Output format options
-  const [codeFormat, setCodeFormat] = useState<"css" | "reactNative">("css");
-  const [colorFormat, setColorFormat] = useState<"hex" | "rgba">("hex");
-  const [includeLocations, setIncludeLocations] = useState<boolean>(true);
-  
-  // Saved gradients
+  // State for saved gradients
   const [savedGradients, setSavedGradients] = useState<Gradient[]>([]);
   
+  // State for code output options
+  const [codeFormat, setCodeFormat] = useState<"reactNative" | "css">("css");
+  const [colorFormat, setColorFormat] = useState<"hex" | "rgba">("hex");
+  const [includeLocations, setIncludeLocations] = useState(true);
+  
+  // Toast notifications
   const { toast } = useToast();
   
-  // Load saved gradients on component mount
+  // Load saved gradients from localStorage on mount
   useEffect(() => {
-    setSavedGradients(getSavedGradientsFromLocalStorage());
+    const loadedGradients = getSavedGradientsFromLocalStorage();
+    setSavedGradients(loadedGradients);
   }, []);
   
-  // Handle angle change
+  // Angle change handler
   const handleAngleChange = (angle: number) => {
-    setGradient((prev) => ({ ...prev, angle }));
+    setGradient(prev => ({ ...prev, angle }));
   };
   
-  // Handle toggling angle usage
+  // Toggle useAngle handler
   const handleToggleUseAngle = (useAngle: boolean) => {
-    setGradient((prev) => ({ ...prev, useAngle }));
+    setGradient(prev => ({ ...prev, useAngle }));
   };
   
-  // Handle color stop change
+  // Color stop change handler
   const handleColorStopChange = (index: number, colorStop: ColorStop) => {
-    const newColorStops = [...gradient.colorStops];
-    newColorStops[index] = colorStop;
-    setGradient((prev) => ({ ...prev, colorStops: newColorStops }));
+    setGradient(prev => {
+      const updatedStops = [...prev.colorStops];
+      updatedStops[index] = colorStop;
+      return { ...prev, colorStops: updatedStops };
+    });
   };
   
-  // Add a new color stop
+  // Add color stop handler
   const handleAddColorStop = () => {
-    if (gradient.colorStops.length >= 5) return; // Maximum 5 color stops
-    
-    // Find a good position for the new color stop
-    const positions = gradient.colorStops.map(stop => stop.position);
-    const lastPosition = Math.max(...positions);
-    const firstPosition = Math.min(...positions);
-    
-    let newPosition;
-    if (lastPosition < 1) {
-      newPosition = Math.min(1, lastPosition + 0.25);
-    } else if (firstPosition > 0) {
-      newPosition = Math.max(0, firstPosition - 0.25);
-    } else {
-      // Find the largest gap
-      positions.sort((a, b) => a - b);
-      let maxGap = 0;
-      let gapPosition = 0.5;
-      
-      for (let i = 0; i < positions.length - 1; i++) {
-        const gap = positions[i + 1] - positions[i];
-        if (gap > maxGap) {
-          maxGap = gap;
-          gapPosition = positions[i] + gap / 2;
-        }
-      }
-      
-      newPosition = gapPosition;
+    if (gradient.colorStops.length >= 5) {
+      toast("Maximum of 5 color stops allowed", { type: "warning" });
+      return;
     }
+    
+    // Calculate a location between existing stops
+    const lastStopLocation = gradient.colorStops.length > 0 
+      ? gradient.colorStops[gradient.colorStops.length - 1].location
+      : 0;
+    const firstStopLocation = gradient.colorStops.length > 0 
+      ? gradient.colorStops[0].location
+      : 1;
+    
+    // New stop in the middle or at a reasonable location
+    const newLocation = gradient.colorStops.length > 1
+      ? (lastStopLocation + firstStopLocation) / 2
+      : gradient.colorStops.length === 1
+        ? 1
+        : 0.5;
     
     const newColorStop: ColorStop = {
       color: "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0'),
-      position: newPosition,
+      location: newLocation,
+      opacity: 1
     };
     
-    const newColorStops = [...gradient.colorStops, newColorStop];
-    setGradient((prev) => ({ ...prev, colorStops: newColorStops }));
-  };
-  
-  // Remove a color stop
-  const handleRemoveColorStop = (index: number) => {
-    if (gradient.colorStops.length <= 2) return; // Minimum 2 color stops
+    setGradient(prev => ({
+      ...prev,
+      colorStops: [...prev.colorStops, newColorStop].sort((a, b) => a.location - b.location)
+    }));
     
-    const newColorStops = gradient.colorStops.filter((_, i) => i !== index);
-    setGradient((prev) => ({ ...prev, colorStops: newColorStops }));
+    toast("Added new color stop", { type: "success" });
   };
   
-  // Handle randomize
-  const handleRandomize = () => {
-    setGradient(generateRandomGradient());
-    toast("Generated a random gradient", { type: "success" });
-  };
-  
-  // Save current gradient
-  const handleSaveGradient = () => {
-    // Ensure the gradient has a name
-    if (!gradient.name || gradient.name.trim() === "") {
-      const defaultName = `Gradient ${new Date().toLocaleString()}`;
-      setGradient((prev) => ({ ...prev, name: defaultName }));
-      saveGradientToLocalStorage({ ...gradient, name: defaultName });
-    } else {
-      saveGradientToLocalStorage(gradient);
+  // Remove color stop handler
+  const handleRemoveColorStop = (index: number) => {
+    if (gradient.colorStops.length <= 2) {
+      toast("At least two color stops are required", { type: "warning" });
+      return;
     }
     
-    setSavedGradients(getSavedGradientsFromLocalStorage());
-    toast("Gradient saved successfully", { type: "success" });
+    setGradient(prev => {
+      const updatedStops = [...prev.colorStops];
+      updatedStops.splice(index, 1);
+      return { ...prev, colorStops: updatedStops };
+    });
+    
+    toast("Removed color stop", { type: "success" });
   };
   
-  // Load a saved gradient
+  // Randomize gradient handler
+  const handleRandomize = () => {
+    const randomGradient = generateRandomGradient();
+    setGradient(randomGradient);
+    toast("Generated random gradient", { type: "success" });
+  };
+  
+  // Save gradient handler
+  const handleSaveGradient = () => {
+    // Create a copy with a new ID to save
+    const savedGradient = saveGradientToLocalStorage({
+      ...gradient,
+      id: nanoid(), // Generate a new ID to allow saving the same gradient multiple times
+      name: gradient.name || `Gradient ${savedGradients.length + 1}`
+    });
+    
+    if (savedGradient) {
+      setSavedGradients(prev => [...prev, savedGradient]);
+      toast("Gradient saved successfully", { type: "success" });
+    } else {
+      toast("Failed to save gradient", { type: "error" });
+    }
+  };
+  
+  // Load gradient handler
   const handleLoadGradient = (gradient: Gradient) => {
     setGradient(gradient);
     toast("Gradient loaded", { type: "success" });
   };
   
-  // Delete a saved gradient
+  // Delete gradient handler
   const handleDeleteGradient = (id: string | undefined) => {
-    if (id) {
-      deleteGradientFromLocalStorage(id);
-      setSavedGradients(getSavedGradientsFromLocalStorage());
-      toast("Gradient deleted", { type: "success" });
-    }
+    if (!id) return;
+    
+    deleteGradientFromLocalStorage(id);
+    setSavedGradients(prev => prev.filter(g => g.id !== id));
+    toast("Gradient deleted", { type: "success" });
   };
   
-  // Clear all saved gradients
+  // Clear all gradients handler
   const handleClearAllGradients = () => {
     deleteAllGradientsFromLocalStorage();
     setSavedGradients([]);
@@ -137,57 +159,74 @@ const GradientGenerator = () => {
   };
   
   return (
-    <div className="container mx-auto py-8 px-4">
-      <header className="text-center mb-10">
-        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-          Gradient Generator
-        </h1>
-        <p className="text-muted-foreground">
-          Create, customize, and export beautiful CSS and React Native gradients
-        </p>
+    <div className="min-h-screen bg-background text-foreground pb-16">
+      {/* Header */}
+      <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              Gradient Generator
+            </h1>
+          </div>
+          
+          <ThemeToggle />
+        </div>
       </header>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <GradientPreview 
-            gradient={gradient} 
-            onRandomize={handleRandomize} 
-            onSave={handleSaveGradient}
-            codeFormat={codeFormat}
-          />
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Controls */}
+          <div className="lg:col-span-1 space-y-8">
+            <GradientControls 
+              gradient={gradient} 
+              onAngleChange={handleAngleChange}
+              onColorStopChange={handleColorStopChange}
+              onAddColorStop={handleAddColorStop}
+              onRemoveColorStop={handleRemoveColorStop}
+              onToggleUseAngle={handleToggleUseAngle}
+            />
+          </div>
           
-          <GradientCodeOutput
-            gradient={gradient}
-            codeFormat={codeFormat}
-            setCodeFormat={setCodeFormat}
-            colorFormat={colorFormat}
-            setColorFormat={setColorFormat}
-            includeLocations={includeLocations}
-            setIncludeLocations={setIncludeLocations}
-            onToggleUseAngle={handleToggleUseAngle}
-          />
+          {/* Right Column: Preview and Code */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Preview */}
+            <GradientPreview 
+              gradient={gradient}
+              onRandomize={handleRandomize}
+              onSave={handleSaveGradient}
+              codeFormat={codeFormat}
+            />
+            
+            {/* Code Output */}
+            <GradientCodeOutput
+              gradient={gradient}
+              codeFormat={codeFormat}
+              setCodeFormat={setCodeFormat}
+              colorFormat={colorFormat}
+              setColorFormat={setColorFormat}
+              includeLocations={includeLocations}
+              setIncludeLocations={setIncludeLocations}
+              onToggleUseAngle={handleToggleUseAngle}
+            />
+            
+            {/* Saved Gradients */}
+            <SavedGradients
+              savedGradients={savedGradients}
+              onLoad={handleLoadGradient}
+              onDelete={handleDeleteGradient}
+              onClearAll={handleClearAllGradients}
+            />
+          </div>
         </div>
-        
-        <div className="space-y-6">
-          <GradientControls
-            gradient={gradient}
-            onAngleChange={handleAngleChange}
-            onColorStopChange={handleColorStopChange}
-            onAddColorStop={handleAddColorStop}
-            onRemoveColorStop={handleRemoveColorStop}
-            onToggleUseAngle={handleToggleUseAngle}
-          />
-          
-          <SavedGradients
-            savedGradients={savedGradients}
-            onLoad={handleLoadGradient}
-            onDelete={handleDeleteGradient}
-            onClearAll={handleClearAllGradients}
-          />
+      </main>
+      
+      {/* Footer */}
+      <footer className="border-t mt-16">
+        <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
+          <p>Gradient Generator - A tool for creating beautiful gradients for your projects</p>
         </div>
-      </div>
+      </footer>
     </div>
   );
-};
-
-export default GradientGenerator;
+}

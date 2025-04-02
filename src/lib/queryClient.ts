@@ -6,44 +6,63 @@ import { QueryClient } from "@tanstack/react-query";
  * be extended later to support real API calls if needed.
  */
 
+// Helper function to check response status
 export async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const error = new Error(`Error ${res.status}: ${res.statusText}`);
+    const errorText = await res.text();
+    throw new Error(`API Error: ${res.status} ${res.statusText} - ${errorText}`);
+  }
+}
+
+// Helper function for API requests
+export async function apiRequest<T>(
+  path: string,
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" = "GET",
+  body?: any,
+  init?: RequestInit
+): Promise<T> {
+  try {
+    const url = path.startsWith("http") ? path : `/api${path}`;
+    
+    const response = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...(init?.headers || {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      ...init,
+    });
+    
+    await throwIfResNotOk(response);
+    return await response.json();
+  } catch (error) {
+    console.error("API Request Error:", error);
     throw error;
   }
 }
 
-export async function apiRequest<T>(
-  input: RequestInfo | URL,
-  init?: RequestInit
-): Promise<T> {
-  const res = await fetch(input, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers || {}),
-    },
-  });
-  
-  await throwIfResNotOk(res);
-  return res.json();
-}
-
+// Define behavior for unauthorized requests
 type UnauthorizedBehavior = "returnNull" | "throw";
+
+// Helper function to get query function with specific behavior
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
-}) => (path: string) => Promise<T> = () => {
-  return async (path: string) => {
-    const response = await fetch(path);
-    return response.json();
-  };
+}) => (context: { queryKey: [string, ...any[]] }) => Promise<T | null> = (options) => async (
+  context
+) => {
+  // For frontend-only app, just return mock data or null
+  // This can be expanded to actually fetch from an API if needed
+  return null;
 };
 
+// Create the query client
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
+      retry: 0,
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
     },
   },
 });

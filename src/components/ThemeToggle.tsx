@@ -1,54 +1,79 @@
-import React, { useState, useEffect } from "react";
-import { Sun, Moon, Laptop } from "lucide-react";
-import { setTheme, Theme } from "../lib/utils";
-import { Button } from "./ui/button";
+import React, { useEffect, useState } from 'react';
+import { Moon, Sun, Monitor } from 'lucide-react';
+import { Button } from './ui/button';
+import { Theme, getSystemTheme, setTheme } from '../lib/utils';
 
-const ThemeToggle: React.FC = () => {
-  const [currentTheme, setCurrentTheme] = useState<Theme>("system");
-
+export function ThemeToggle() {
+  const [theme, setThemeState] = useState<Theme>('system');
+  
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
-    if (savedTheme) {
-      setCurrentTheme(savedTheme);
+    // Load theme from localStorage
+    const storedTheme = localStorage.getItem('theme') as Theme;
+    
+    if (storedTheme) {
+      setThemeState(storedTheme);
+      applyTheme(storedTheme);
+    } else {
+      // Default to system theme
+      setThemeState('system');
+      applyTheme('system');
     }
-  }, []);
-
-  const handleThemeChange = (newTheme: Theme) => {
-    setTheme(newTheme);
-    setCurrentTheme(newTheme);
+    
+    // Add listener for system preference changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      if (theme === 'system') {
+        applyTheme('system');
+      }
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, [theme]);
+  
+  const applyTheme = (theme: Theme) => {
+    setTheme(theme);
   };
-
+  
+  const handleThemeChange = (newTheme: Theme) => {
+    setThemeState(newTheme);
+    applyTheme(newTheme);
+  };
+  
   return (
-    <div className="flex items-center space-x-1">
+    <div className="flex items-center gap-2">
       <Button
-        variant={currentTheme === "light" ? "default" : "ghost"}
+        variant={theme === 'light' ? 'default' : 'ghost'}
         size="icon"
-        onClick={() => handleThemeChange("light")}
-        title="Light mode"
+        onClick={() => handleThemeChange('light')}
+        aria-label="Light mode"
+        className={theme === 'light' ? 'bg-primary text-primary-foreground' : ''}
       >
-        <Sun className="h-[1.2rem] w-[1.2rem]" />
-        <span className="sr-only">Light mode</span>
+        <Sun className="h-5 w-5" />
       </Button>
+      
       <Button
-        variant={currentTheme === "dark" ? "default" : "ghost"}
+        variant={theme === 'dark' ? 'default' : 'ghost'}
         size="icon"
-        onClick={() => handleThemeChange("dark")}
-        title="Dark mode"
+        onClick={() => handleThemeChange('dark')}
+        aria-label="Dark mode"
+        className={theme === 'dark' ? 'bg-primary text-primary-foreground' : ''}
       >
-        <Moon className="h-[1.2rem] w-[1.2rem]" />
-        <span className="sr-only">Dark mode</span>
+        <Moon className="h-5 w-5" />
       </Button>
+      
       <Button
-        variant={currentTheme === "system" ? "default" : "ghost"}
+        variant={theme === 'system' ? 'default' : 'ghost'}
         size="icon"
-        onClick={() => handleThemeChange("system")}
-        title="System theme"
+        onClick={() => handleThemeChange('system')}
+        aria-label="System theme"
+        className={theme === 'system' ? 'bg-primary text-primary-foreground' : ''}
       >
-        <Laptop className="h-[1.2rem] w-[1.2rem]" />
-        <span className="sr-only">System theme</span>
+        <Monitor className="h-5 w-5" />
       </Button>
     </div>
   );
-};
-
-export default ThemeToggle;
+}

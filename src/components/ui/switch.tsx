@@ -1,28 +1,42 @@
-import * as React from "react";
-import { cn } from "../../lib/utils";
+import React from 'react';
+import { cn } from '../../lib/utils';
 
 interface SwitchProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onCheckedChange?: (checked: boolean) => void;
 }
 
 export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
-  ({ className, onCheckedChange, checked, ...props }, ref) => {
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const isChecked = event.target.checked;
-      onCheckedChange?.(isChecked);
+  ({ className, onCheckedChange, ...props }, ref) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (onCheckedChange) {
+        onCheckedChange(e.target.checked);
+      }
+      if (props.onChange) {
+        props.onChange(e);
+      }
     };
 
     return (
-      <label className={cn("inline-flex items-center cursor-pointer", className)}>
+      <label
+        className={cn(
+          "inline-flex items-center cursor-pointer relative",
+          className
+        )}
+      >
         <input
           type="checkbox"
           className="sr-only peer"
-          checked={checked}
-          onChange={handleChange}
           ref={ref}
+          onChange={handleChange}
           {...props}
         />
-        <div className="relative w-11 h-6 bg-muted rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary peer-focus:ring-offset-2 peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+        <div className={cn(
+          "relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700",
+          "peer-checked:after:translate-x-full peer-checked:after:border-white",
+          "after:content-[''] after:absolute after:top-[2px] after:left-[2px]",
+          "after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5",
+          "after:transition-all peer-checked:bg-primary"
+        )}></div>
       </label>
     );
   }
