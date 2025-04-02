@@ -7,7 +7,6 @@ import { GradientCodeOutput } from '../components/GradientCodeOutput';
 import { SavedGradients } from '../components/SavedGradients';
 import GradientPreview from '../components/GradientPreview';
 import { useToast } from '../hooks/use-toast';
-import { ThemeToggle } from '../components/ThemeToggle';
 
 export default function GradientGenerator() {
   // State for the current working gradient

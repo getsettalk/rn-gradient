@@ -33,6 +33,9 @@
     --ring: 221.2 83.2% 53.3%;
 
     --radius: 0.5rem;
+    
+    /* Variable to ensure theme toggle is visible */
+    --theme-toggle-display: block; 
   }
 
   .dark {
@@ -74,6 +77,21 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  
+  /* Ensure theme toggle is visible */
+  .SimpleThemeToggle {
+    display: var(--theme-toggle-display, block) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* Make sure theme toggle is always visible on root routes */
+#root > header button {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 /* Animation classes */
