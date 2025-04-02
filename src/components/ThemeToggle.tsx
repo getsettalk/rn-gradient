@@ -44,10 +44,10 @@ export function ThemeToggle() {
   };
   
   return (
-    <div className="flex items-center gap-2 border rounded-full p-1 bg-background shadow-sm">
+    <div className="flex items-center gap-2 border-2 border-primary/20 rounded-full p-1 bg-background shadow-lg">
       <Button
         variant="ghost"
-        size="icon"
+        size="sm"
         onClick={() => {
           handleThemeChange('light');
           document.documentElement.classList.remove('dark');
@@ -60,16 +60,17 @@ export function ThemeToggle() {
           }
         }}
         aria-label="Light mode"
-        className={`transition-all ${theme === 'light' 
-          ? 'bg-primary text-white scale-100 shadow-md' 
-          : 'text-foreground hover:text-primary hover:bg-background/80'}`}
+        className={`relative overflow-hidden transition-all rounded-full ${theme === 'light' 
+          ? 'bg-gradient-to-r from-yellow-400 to-orange-300 text-white scale-100 shadow-md font-medium' 
+          : 'text-foreground hover:text-yellow-500 hover:bg-yellow-100/20'}`}
       >
-        <Sun className="h-5 w-5" />
+        <Sun className="h-5 w-5 mr-1" />
+        <span className="text-xs">Light</span>
       </Button>
       
       <Button
         variant="ghost"
-        size="icon"
+        size="sm"
         onClick={() => {
           handleThemeChange('dark');
           document.documentElement.classList.remove('light');
@@ -82,16 +83,17 @@ export function ThemeToggle() {
           }
         }}
         aria-label="Dark mode"
-        className={`transition-all ${theme === 'dark' 
-          ? 'bg-primary text-white scale-100 shadow-md' 
-          : 'text-foreground hover:text-primary hover:bg-background/80'}`}
+        className={`relative overflow-hidden transition-all rounded-full ${theme === 'dark' 
+          ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white scale-100 shadow-md font-medium' 
+          : 'text-foreground hover:text-indigo-500 hover:bg-indigo-100/20'}`}
       >
-        <Moon className="h-5 w-5" />
+        <Moon className="h-5 w-5 mr-1" />
+        <span className="text-xs">Dark</span>
       </Button>
       
       <Button
         variant="ghost"
-        size="icon"
+        size="sm"
         onClick={() => {
           handleThemeChange('system');
           // Apply system theme immediately
@@ -106,11 +108,12 @@ export function ThemeToggle() {
           }
         }}
         aria-label="System theme"
-        className={`transition-all ${theme === 'system' 
-          ? 'bg-primary text-white scale-100 shadow-md' 
-          : 'text-foreground hover:text-primary hover:bg-background/80'}`}
+        className={`relative overflow-hidden transition-all rounded-full ${theme === 'system' 
+          ? 'bg-gradient-to-r from-blue-500 to-teal-400 text-white scale-100 shadow-md font-medium' 
+          : 'text-foreground hover:text-blue-500 hover:bg-blue-100/20'}`}
       >
-        <Monitor className="h-5 w-5" />
+        <Monitor className="h-5 w-5 mr-1" />
+        <span className="text-xs">Auto</span>
       </Button>
     </div>
   );
