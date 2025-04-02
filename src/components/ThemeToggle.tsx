@@ -44,13 +44,25 @@ export function ThemeToggle() {
   };
   
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 border rounded-full p-1 bg-background shadow-sm">
       <Button
         variant={theme === 'light' ? 'default' : 'ghost'}
         size="icon"
-        onClick={() => handleThemeChange('light')}
+        onClick={() => {
+          handleThemeChange('light');
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+          // Visual feedback on click
+          const button = document.activeElement as HTMLButtonElement;
+          if (button) {
+            button.classList.add('scale-90');
+            setTimeout(() => button.classList.remove('scale-90'), 100);
+          }
+        }}
         aria-label="Light mode"
-        className={theme === 'light' ? 'bg-primary text-primary-foreground' : ''}
+        className={`transition-all ${theme === 'light' 
+          ? 'bg-primary text-primary-foreground scale-100 shadow-md' 
+          : 'hover:text-primary hover:bg-background/80'}`}
       >
         <Sun className="h-5 w-5" />
       </Button>
@@ -58,9 +70,21 @@ export function ThemeToggle() {
       <Button
         variant={theme === 'dark' ? 'default' : 'ghost'}
         size="icon"
-        onClick={() => handleThemeChange('dark')}
+        onClick={() => {
+          handleThemeChange('dark');
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.add('dark');
+          // Visual feedback on click
+          const button = document.activeElement as HTMLButtonElement;
+          if (button) {
+            button.classList.add('scale-90');
+            setTimeout(() => button.classList.remove('scale-90'), 100);
+          }
+        }}
         aria-label="Dark mode"
-        className={theme === 'dark' ? 'bg-primary text-primary-foreground' : ''}
+        className={`transition-all ${theme === 'dark' 
+          ? 'bg-primary text-primary-foreground scale-100 shadow-md' 
+          : 'hover:text-primary hover:bg-background/80'}`}
       >
         <Moon className="h-5 w-5" />
       </Button>
@@ -68,9 +92,23 @@ export function ThemeToggle() {
       <Button
         variant={theme === 'system' ? 'default' : 'ghost'}
         size="icon"
-        onClick={() => handleThemeChange('system')}
+        onClick={() => {
+          handleThemeChange('system');
+          // Apply system theme immediately
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.classList.remove('light', 'dark');
+          document.documentElement.classList.add(isDarkMode ? 'dark' : 'light');
+          // Visual feedback on click
+          const button = document.activeElement as HTMLButtonElement;
+          if (button) {
+            button.classList.add('scale-90');
+            setTimeout(() => button.classList.remove('scale-90'), 100);
+          }
+        }}
         aria-label="System theme"
-        className={theme === 'system' ? 'bg-primary text-primary-foreground' : ''}
+        className={`transition-all ${theme === 'system' 
+          ? 'bg-primary text-primary-foreground scale-100 shadow-md' 
+          : 'hover:text-primary hover:bg-background/80'}`}
       >
         <Monitor className="h-5 w-5" />
       </Button>

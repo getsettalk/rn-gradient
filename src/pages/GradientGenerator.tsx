@@ -114,9 +114,36 @@ export default function GradientGenerator() {
   
   // Randomize gradient handler
   const handleRandomize = () => {
-    const randomGradient = generateRandomGradient();
-    setGradient(randomGradient);
+    // Preserve the current number of color stops
+    const currentStopCount = gradient.colorStops.length;
+    
+    // Generate new random colors but keep the same number of stops
+    const newColorStops: ColorStop[] = [];
+    
+    for (let i = 0; i < currentStopCount; i++) {
+      newColorStops.push({
+        color: generateRandomHexColor(),
+        location: i / (currentStopCount - 1), // Distribute evenly
+        opacity: Math.random() * 0.3 + 0.7 // Between 0.7 and 1.0
+      });
+    }
+    
+    // Generate random angle
+    const angle = Math.floor(Math.random() * 360);
+    
+    setGradient(prev => ({
+      ...prev,
+      colorStops: newColorStops,
+      angle,
+      name: "Random Gradient"
+    }));
+    
     toast("Generated random gradient", { type: "success" });
+  };
+  
+  // Helper function to generate random hex color
+  const generateRandomHexColor = (): string => {
+    return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
   };
   
   // Save gradient handler

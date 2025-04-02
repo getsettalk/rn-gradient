@@ -47,16 +47,26 @@ const GradientPreview = ({ gradient, onRandomize, onSave, codeFormat }: Gradient
       <div className="flex flex-wrap gap-2">
         <Button
           onClick={onRandomize}
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 active:scale-95 transition-transform active:bg-primary/90"
         >
           <Shuffle className="h-4 w-4 mr-1" />
           Randomize
         </Button>
         
         <Button
-          onClick={onSave}
+          onClick={() => {
+            onSave();
+            // Add visual feedback
+            const button = document.activeElement as HTMLButtonElement;
+            if (button) {
+              button.classList.add('animate-pulse', 'bg-green-600');
+              setTimeout(() => {
+                button.classList.remove('animate-pulse', 'bg-green-600');
+              }, 500);
+            }
+          }}
           variant="outline"
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 active:scale-95 transition-transform hover:border-primary/50"
         >
           <Save className="h-4 w-4 mr-1" />
           Save
@@ -65,7 +75,7 @@ const GradientPreview = ({ gradient, onRandomize, onSave, codeFormat }: Gradient
         <Button
           onClick={handleCopy}
           variant="secondary"
-          className="flex items-center gap-1 ml-auto"
+          className="flex items-center gap-1 ml-auto active:scale-95 transition-transform"
         >
           <Copy className="h-4 w-4 mr-1" />
           Copy Code
