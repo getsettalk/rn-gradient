@@ -1,13 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <!-- This script injects a replit badge into the page, please feel free to remove this line -->
 
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <title>React Native Gradient Generator</title>
+
+  <meta name="description"
+    content="Create, customize, and export beautiful linear gradients for your React Native apps with the React Native Gradient Generator." />
+  <!-- Open Graph meta tags for social media sharing -->
+  <meta property="og:title" content="React Native Gradient Generator" />
+  <meta property="og:description"
+    content="Generate and customize gradients for your React Native and web applications." />
+  <meta property="og:image" content="" id="og-image" />
+  <meta property="og:url" content="" id="og-url" />
+
+  <!-- Twitter Card meta tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="React Native Gradient Generator" />
+  <meta name="twitter:description" content="A tool to create beautiful gradients for React Native apps and websites." />
+  <meta name="twitter:image" content="" id="twitter-image" />
+
+  <!-- SEO-Friendly robots tag -->
+  <meta name="robots" content="index, follow" />
+  <meta name="keywords"
+    content="react native, gradient generator, linear gradients, web gradients, mobile app gradients, gradient colors, react native gradient generator, react native linear gradient generator, react native gradient generator online, react native gradient generator free, react native gradient generator tool, rn-gradient, rn-colors picker, rn-colors picker, rn-colors picker online, rn-colors picker free, rn-colors picker tool, rn-gradient generator, rn-gradient generator online, rn-gradient generator free, rn-gradient generator tool" />
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+  <link rel="icon" href="/logo.png" />
+
+  <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "React Native Gradient Generator",
+        "url": "",
+        "description": "Create, customize, and export linear gradients for React Native and web apps.",
+        "logo": "",
+        "publisher": {
+          "@type": "Organization",
+          "name": "React Native Gradient Generator"
+        }
+      }
+    </script>
+
+  <script>
+    // Dynamically set the base URL
+    const siteUrl = window.location.origin;
+
+    document.getElementById("og-url").content = siteUrl;
+    document.getElementById("twitter-image").content = `${siteUrl}/twitter-image.png`;
+    document.getElementById("og-image").content = `${siteUrl}/og-image.png`;
+
+    // Update structured data dynamically
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "React Native Gradient Generator",
+      "url": siteUrl,
+      "description": "Create, customize, and export linear gradients for React Native and web apps.",
+      "logo": `${siteUrl}/logo.png`,
+      "publisher": {
+        "@type": "Organization",
+        "name": "React Native Gradient Generator"
+      }
+    };
+    document.querySelector('script[type="application/ld+json"]').innerHTML = JSON.stringify(structuredData);
+  </script>
+
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+  <!-- This script injects a replit badge into the page, please feel free to remove this line -->
+
+</body>
+
 </html>
