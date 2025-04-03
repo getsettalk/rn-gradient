@@ -6,6 +6,7 @@ import SavedGradients from "@/components/SavedGradients";
 import { Gradient, ColorStop } from "@shared/schema";
 import { generateRandomGradient } from "@/lib/gradient";
 import { nanoid } from "nanoid";
+import { toast } from "@/hooks/use-toast";
 
 const GradientGenerator = () => {
   const [currentGradient, setCurrentGradient] = useState<Gradient>({
@@ -97,6 +98,11 @@ const GradientGenerator = () => {
     };
     
     setSavedGradients(prev => [newGradient, ...prev]);
+    toast({
+      title: "Gradient saved successfully",
+      type: "foreground",
+      duration: 3900
+    });
   };
 
   const handleLoadGradient = (gradient: Gradient) => {
