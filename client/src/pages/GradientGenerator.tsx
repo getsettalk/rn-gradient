@@ -12,8 +12,8 @@ const GradientGenerator = () => {
   const [currentGradient, setCurrentGradient] = useState<Gradient>({
     angle: 120,
     colorStops: [
-      { color: "#6366F1", position: 0 },
-      { color: "#EC4899", position: 100 }
+      { color: "#40F680", position: 0 },
+      { color: "#01C7A0", position: 100 }
     ],
     useAngle: false
   });
