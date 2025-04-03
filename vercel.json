@@ -1,11 +1,1 @@
-{
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "github": {
-    "silent": true
-  }
-}
+{ "rewrites": [{ "source": "/(.*)", "destination": "/" }] }
