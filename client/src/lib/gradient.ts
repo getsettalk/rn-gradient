@@ -62,11 +62,16 @@ export const generateReactNativeCode = (
     code += `    angle={${gradient.angle}}\n`;
   } else {
     // Calculate start and end based on angle
-    const angleInRadians = (gradient.angle * Math.PI) / 180;
-    const startX = 0.5 - 0.5 * Math.cos(angleInRadians);
-    const startY = 0.5 + 0.5 * Math.sin(angleInRadians);
-    const endX = 0.5 + 0.5 * Math.cos(angleInRadians);
-    const endY = 0.5 - 0.5 * Math.sin(angleInRadians);
+    const angleInRadians = ((90 - gradient.angle) * Math.PI) / 180; // Convert to RN system
+
+    const startX = 0.5 + 0.5 * Math.cos(angleInRadians);
+    const startY = 0.5 - 0.5 * Math.sin(angleInRadians);
+    const endX = 0.5 - 0.5 * Math.cos(angleInRadians);
+    const endY = 0.5 + 0.5 * Math.sin(angleInRadians);
+    
+    
+    
+    
     
     code += `    start={{x: ${startX.toFixed(2)}, y: ${startY.toFixed(2)}}}\n`;
     code += `    end={{x: ${endX.toFixed(2)}, y: ${endY.toFixed(2)}}}\n`;

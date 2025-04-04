@@ -168,6 +168,13 @@ const GradientGenerator = () => {
           onClearAll={handleClearAllGradients}
         />
       </main>
+
+        {/* Footer Section */}
+        <footer className=" text-center  mt-8">
+        <p className="text-sm">
+          Made with ❤️ in India | This project is <a href="https://github.com/getsettalk/rn-gradient" className="text-blue-400" target="_blank" rel="noopener noreferrer">open source</a>
+        </p>
+      </footer>
     </div>
   );
 };
