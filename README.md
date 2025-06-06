@@ -8,7 +8,7 @@ A React-based gradient generator tool that enables users to create, customize, a
 - Live preview of gradients
 - Generate CSS and React Native code
 - Save and load gradient presets
-- Dark/Light theme toggle
+- Dark/Light theme 
 - Responsive design
 
 
