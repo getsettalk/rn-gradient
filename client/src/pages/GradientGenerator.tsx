@@ -62,10 +62,10 @@ const GradientGenerator = () => {
     const maxPosition = Math.max(...positions);
     const minPosition = Math.min(...positions);
     const midPosition = Math.round((maxPosition + minPosition) / 2);
-    
+
     // Use a color that's a mix of the existing colors
     const newColor = "#8B5CF6"; // Default to purple
-    
+
     setCurrentGradient({
       ...currentGradient,
       colorStops: [
@@ -96,7 +96,7 @@ const GradientGenerator = () => {
       ...currentGradient,
       id: nanoid()
     };
-    
+
     setSavedGradients(prev => [newGradient, ...prev]);
     toast({
       title: "Gradient saved successfully",
@@ -128,12 +128,12 @@ const GradientGenerator = () => {
   return (
     <div className="min-h-screen pb-8 font-sans bg-background text-foreground">
       <header className="p-6 text-center">
-        <h1 className="text-3xl font-semibold mb-2">React Native Gradient Generator</h1>
+        <h1 className="text-3xl font-semibold mb-2 bg-gradient-to-r from-[#40F680] to-[#01C7A0] bg-clip-text text-transparent">React Native Gradient Generator</h1>
         <p className="text-muted-foreground">Create, customize, and export beautiful linear gradients for your React Native apps</p>
       </header>
 
       <main className="container mx-auto px-4 max-w-6xl">
-        <GradientPreview 
+        <GradientPreview
           gradient={currentGradient}
           onRandomize={handleRandomize}
           onSave={handleSaveGradient}
@@ -148,7 +148,7 @@ const GradientGenerator = () => {
             onAddColorStop={handleAddColorStop}
             onRemoveColorStop={handleRemoveColorStop}
           />
-          
+
           <GradientCodeOutput
             gradient={currentGradient}
             codeFormat={codeFormat}
@@ -169,11 +169,22 @@ const GradientGenerator = () => {
         />
       </main>
 
-        {/* Footer Section */}
-        <footer className=" text-center  mt-8">
-        <p className="text-sm">
-          Made with ❤️ in India | This project is <a href="https://github.com/getsettalk/rn-gradient" className="text-blue-400" target="_blank" rel="noopener noreferrer">open source</a>
-        </p>
+      {/* Footer Section */}
+      <footer className=" text-center  mt-8">
+        <footer className="text-center mt-8 text-sm">
+          <p>
+            Made with ❤️ in India | This project is{" "}
+            <a href="https://github.com/getsettalk/rn-gradient" className="text-blue-400" target="_blank" rel="noopener noreferrer">
+              open source
+            </a>
+            <br />
+            <a href="https://github.com/getsettalk/rn-gradient/stargazers" target="_blank" rel="noopener noreferrer">⭐ 2 Stars</a> |{" "}
+            <a href="https://github.com/getsettalk/rn-gradient/network/members" target="_blank" rel="noopener noreferrer">🍴 0 Forks</a> |{" "}
+            <a href="https://github.com/getsettalk/rn-gradient/watchers" target="_blank" rel="noopener noreferrer">👀 1 Watching</a> |{" "}
+            <a href="https://github.com/getsettalk/rn-gradient/graphs/contributors" target="_blank" rel="noopener noreferrer">👤 Contributors</a> |{" "}
+            <a href="https://github.com/getsettalk/rn-gradient/issues" target="_blank" rel="noopener noreferrer">🐛 Issues</a>
+          </p>
+        </footer>
       </footer>
     </div>
   );

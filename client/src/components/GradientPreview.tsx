@@ -14,9 +14,16 @@ interface GradientPreviewProps {
 
 const GradientPreview = ({ gradient, onRandomize, onSave, codeFormat }: GradientPreviewProps) => {
   const { toast } = useToast();
-  
+  const [isAnimating, setIsAnimating] = useState(false);
+
   const gradientStyle = {
     background: generateGradientCSS(gradient)
+  };
+
+  const handleRandomizeClick = () => {
+    setIsAnimating(true);
+    onRandomize();
+    setTimeout(() => setIsAnimating(false), 350); // Animation duration
   };
 
   const handleCopyCode = () => {
@@ -53,8 +60,8 @@ const GradientPreview = ({ gradient, onRandomize, onSave, codeFormat }: Gradient
       <div className="flex flex-wrap justify-between gap-4">
         <Button 
           variant="default" 
-          onClick={onRandomize} 
-          className="flex items-center gap-2"
+          onClick={handleRandomizeClick} 
+          className={`flex items-center gap-2 transition-transform duration-300 ${isAnimating ? 'scale-110' : ''}`}
         >
           <Shuffle className="h-4 w-4" />
           Randomize
