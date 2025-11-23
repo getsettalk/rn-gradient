@@ -178,9 +178,9 @@ const GradientGenerator = () => {
               open source
             </a>
             <br />
-            <a href="https://github.com/getsettalk/rn-gradient/stargazers" target="_blank" rel="noopener noreferrer">⭐ 2 Stars</a> |{" "}
-            <a href="https://github.com/getsettalk/rn-gradient/network/members" target="_blank" rel="noopener noreferrer">🍴 0 Forks</a> |{" "}
-            <a href="https://github.com/getsettalk/rn-gradient/watchers" target="_blank" rel="noopener noreferrer">👀 1 Watching</a> |{" "}
+            <a href="https://github.com/getsettalk/rn-gradient/stargazers" target="_blank" rel="noopener noreferrer">⭐  Stars</a> |{" "}
+            <a href="https://github.com/getsettalk/rn-gradient/network/members" target="_blank" rel="noopener noreferrer">🍴  Forks</a> |{" "}
+            <a href="https://github.com/getsettalk/rn-gradient/watchers" target="_blank" rel="noopener noreferrer">👀 Watching</a> |{" "}
             <a href="https://github.com/getsettalk/rn-gradient/graphs/contributors" target="_blank" rel="noopener noreferrer">👤 Contributors</a> |{" "}
             <a href="https://github.com/getsettalk/rn-gradient/issues" target="_blank" rel="noopener noreferrer">🐛 Issues</a>
           </p>
